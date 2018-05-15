@@ -1097,7 +1097,7 @@ root@ubuntu:/usr/work/workspace/CPP/Huffman/Test#
 5.net
 过滤掉空格
 */
- //输出指定文件
+ //输出指定文件 当前输出net和wav文件
 //读取文件 判断以net和换行为一个文件结束符号
 void GetAllNetAndWavFileName(string net_list_file,vector<string> &net_list,string & wav_file)
 {
@@ -1139,6 +1139,8 @@ void GetAllNetAndWavFileName(string net_list_file,vector<string> &net_list,strin
 			}
 			if (IsNetFile(file))//if 一行结束 if是换行 判断是不是文件
 				net_list.push_back(file);
+			if (IsWavFile(file))
+				wav_file = file;
 			file.clear();
 		}
 	}
