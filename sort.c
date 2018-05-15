@@ -1081,6 +1081,7 @@ example:
 权值:7  字符:d  编码:0
 root@ubuntu:/usr/work/workspace/CPP/Huffman/Test#
 
+//***********************************************从文件内容筛选内容****************************************************
 */
 /*
 1.net 2
@@ -1096,9 +1097,9 @@ root@ubuntu:/usr/work/workspace/CPP/Huffman/Test#
 5.net
 过滤掉空格
 */
- 
-//读取文件 判断以net结尾的文件名
-void GetAllNetFileName(string net_list_file,vector<string> &net_list,string & wav_file)
+ //输出指定文件
+//读取文件 判断以net和换行为一个文件结束符号
+void GetAllNetAndWavFileName(string net_list_file,vector<string> &net_list,string & wav_file)
 {
 	string line;
 	string file;
@@ -1127,19 +1128,75 @@ void GetAllNetFileName(string net_list_file,vector<string> &net_list,string & wa
 					if (file.size() > 0)
 					{
 						if (IsNetFile(file))
-						{
+							net_list.push_back(file);
+						else if (IsWavFile(file))//wav
+							wav_file = file;
+						else//others
+							net_list.push_back(file);
+						file.clear();
+					}
+				}
+			}
+			if (IsNetFile(file))//if 一行结束 if是换行 判断是不是文件
+				net_list.push_back(file);
+			file.clear();
+		}
+	}
+	else
+	{
+		cout << "cannot open nets.list";
+	}
+
+}
+
+
+//判断所有文件
+//如果文件名于文件名之间有空格的话就当为是一个文件，换行的话也当为一个文件
+void GetAllFileName(string net_list_file, vector<string> &net_list, string & wav_file)
+{
+	string line;
+	string file;
+	ifstream in_stream;
+	char buffer[1024];
+	char ch[3];
+	memset(buffer, 0, 1024);
+	in_stream.open(net_list_file);
+	if (in_stream.is_open())
+	{
+		bool newline = false;
+		while (!in_stream.eof())
+		{
+			getline(in_stream, line);//不读取换行符
+			if (line.size() <= 0)
+				continue;
+			newline = true;
+			const char * cline = line.data();
+			for (int i = 0; i<line.size(); i++)
+			{
+				if (cline[i] != ' ')
+				{
+					file = file + cline[i];
+				}
+				else
+				{
+					if (file.size() > 0)//分类器
+					{
+						if (IsNetFile(file))//net
+							net_list.push_back(file);
+						else if (IsWavFile(file))//wav
+							wav_file = file;
+						else//others
 							net_list.push_back(file);
 							file.clear();
-						}
-						else
-						{
-							if (IsWavFile(file))
-								wav_file = file;
-						}
 					}
 				}
 			}
 			if (IsNetFile(file))
+			{
+				net_list.push_back(file);
+				file.clear();
+			}
+			else
 			{
 				net_list.push_back(file);
 				file.clear();
@@ -1152,10 +1209,6 @@ void GetAllNetFileName(string net_list_file,vector<string> &net_list,string & wa
 	}
 
 }
-
-
-
-
 
 
 
