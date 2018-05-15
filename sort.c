@@ -1082,9 +1082,76 @@ example:
 root@ubuntu:/usr/work/workspace/CPP/Huffman/Test#
 
 */
+/*
+1.net 2
+2.net 3.net
+   4.net
+5.net
 
+读取出来为：
+1.net
+22.net
+3.net
+4.net
+5.net
+过滤掉空格
+*/
+ 
+//读取文件 判断以net结尾的文件名
+void GetAllNetFileName(string net_list_file,vector<string> &net_list,string & wav_file)
+{
+	string line;
+	string file;
+	ifstream in_stream;
+	char buffer[1024];
+	char ch[3];
+	memset(buffer,0,1024);
+	in_stream.open(net_list_file);
+	if (in_stream.is_open())
+	{
+			bool newline = false;
+		while (!in_stream.eof())
+		{
+			getline(in_stream, line);//不读取换行符
+			if (line.size() <= 0)
+				continue;
+			newline = true;
+			const char * cline = line.data();
+			for (int i = 0;i<line.size();i++)
+			{
+				if (cline[i] != ' ')
+				{
+					file = file + cline[i];
+				}else
+				{
+					if (file.size() > 0)
+					{
+						if (IsNetFile(file))
+						{
+							net_list.push_back(file);
+							file.clear();
+						}
+						else
+						{
+							if (IsWavFile(file))
+								wav_file = file;
+						}
+					}
+				}
+			}
+			if (IsNetFile(file))
+			{
+				net_list.push_back(file);
+				file.clear();
+			}
+		}
+	}
+	else
+	{
+		cout << "cannot open nets.list";
+	}
 
-
+}
 
 
 
