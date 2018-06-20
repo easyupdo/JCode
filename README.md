@@ -1,0 +1,3 @@
+# Code
+Algorithm 
+Reusing code
