@@ -1,3 +1,2 @@
 # Code
-Algorithm 
-Reusing code
+Algorithm & Reusing code
