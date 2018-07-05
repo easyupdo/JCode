@@ -1,0 +1,2 @@
+帮助你理解qtsocket 网络数据流 同partABC_net_score_client部分功能
+可以作为下位机开发的结构框架 供参考

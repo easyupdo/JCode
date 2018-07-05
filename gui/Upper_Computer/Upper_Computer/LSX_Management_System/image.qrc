@@ -1,0 +1,40 @@
+<RCC>
+    <qresource prefix="/">
+        <file>image/add-line_horizontal.png</file>
+        <file>image/add-line_vertical.png</file>
+        <file>image/array_down.png</file>
+        <file>image/checkbox_checked.png</file>
+        <file>image/checkbox_unchecked.png</file>
+        <file>image/delete.png</file>
+        <file>image/error.png</file>
+        <file>image/excel.png</file>
+        <file>image/find.png</file>
+        <file>image/Font Awesome Cheatsheet.png</file>
+        <file>image/info.png</file>
+        <file>image/ok_round.ico</file>
+        <file>image/print.png</file>
+        <file>image/question.png</file>
+        <file>image/radio_normal.png</file>
+        <file>image/radio_selected.png</file>
+        <file>image/select.png</file>
+        <file>image/speaker.png</file>
+        <file>image/speaker_mute.png</file>
+        <file>image/sub-line_horizontal.png</file>
+        <file>image/sub-line_vertical.png</file>
+        <file>image/update.png</file>
+        <file>image/min.png</file>
+        <file>image/max.png</file>
+        <file>image/max-min.png</file>
+        <file>image/max-min2.png</file>
+        <file>image/close.png</file>
+        <file>config/config.ini</file>
+        <file>image/BackGround.png</file>
+        <file>image/test.png</file>
+        <file>image/test2.png</file>
+        <file>image/monitor.ico</file>
+        <file>image/blue_home.png</file>
+        <file>image/blue_home_white.png</file>
+        <file>config/mysql.ini</file>
+        <file>image/play.ico</file>
+    </qresource>
+</RCC>

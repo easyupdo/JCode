@@ -1,0 +1,8 @@
+布局：
+	整个界面用四个Dockwidget由于ui界面的主界面无法去掉所以ui界面实现四个DockWidget分布于左右两侧中间空间被朱centralWidget占据；
+	四个dockWidget分别为
+	leftDockWidget:资源管理器
+	dockWidget_6:文件浏览器
+	dockWidget:log显示域
+	dockWidget_3:属性框
+	dockWidget_2:作为去掉centralWidget后的主窗口使用

@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/">
+        <file>font/IpaPanAdd.TTF</file>
+        <file>font/Ksphonet.ttf</file>
+        <file>font/IpaPanNew.ttf</file>
+        <file>font/DoulosSILR.ttf</file>
+        <file>font/DoulosSIL-R.ttf</file>
+        <file>Resources/blue123.css</file>
+        <file>conf/phonetic.ini</file>
+        <file>image/file.png</file>
+        <file>image/folder.png</file>
+        <file>Readme.txt</file>
+        <file>image/Analysis.ico</file>
+    </qresource>
+</RCC>

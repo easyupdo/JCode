@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>tttt.bin</file>
+        <file>456.txt</file>
+    </qresource>
+</RCC>
