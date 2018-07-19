@@ -1,0 +1,94 @@
+
+main
+{
+	unsigned char digest[SHA_DIGEST_LENGTH];
+	const char* s_sstring = "sN9cRrP/n9NdMgdcy2VJFQ==258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+
+	/*SHA_CTX ctx;
+	SHA1_Init(&ctx);
+	SHA1_Update(&ctx, s_sstring, strlen(s_sstring));
+	SHA1_Final(digest, &ctx);*/
+
+	//char mdString[SHA_DIGEST_LENGTH * 2 + 1];
+	//for (int i = 0; i < SHA_DIGEST_LENGTH; i++)
+	//	sprintf(&mdString[i * 2], "%02x", (unsigned int)digest[i]);
+	
+}
+
+
+
+openssl：base64
+
+#include <openssl/pem.h>
+#include <openssl/bio.h>
+#include <openssl/evp.h>
+ 
+ 
+ // ******************************  处理 无法解析_io_fun*********************************
+ ///*
+//* 当libjpeg-turbo为vs2010编译时，vs2015下静态链接libjpeg-turbo会链接出错:找不到__iob_func,
+//* 增加__iob_func到__acrt_iob_func的转换函数解决此问题,
+//* 当libjpeg-turbo用vs2015编译时，不需要此补丁文件
+//*/
+//#if _MSC_VER>=1900
+//#include "stdio.h" 
+//_ACRTIMP_ALT FILE* __cdecl __acrt_iob_func(unsigned);
+//#ifdef __cplusplus 
+//extern "C"
+//#endif 
+//FILE* __cdecl __iob_func(unsigned i) {
+//	return __acrt_iob_func(i);
+//}
+//#endif /* _MSC_VER>=1900 */
+
+// ******************************  处理 无法解析_io_fun*********************************
+ 
+ 
+ 
+int base64_encode(char *in_str, int in_len, char *out_str)
+{
+    BIO *b64, *bio;
+    BUF_MEM *bptr = NULL;
+    size_t size = 0;
+ 
+    if (in_str == NULL || out_str == NULL)
+        return -1;
+ 
+    b64 = BIO_new(BIO_f_base64());
+    bio = BIO_new(BIO_s_mem());
+    bio = BIO_push(b64, bio);
+ 
+    BIO_write(bio, in_str, in_len);
+    BIO_flush(bio);
+ 
+    BIO_get_mem_ptr(bio, &bptr);
+    memcpy(out_str, bptr->data, bptr->length);
+    out_str[bptr->length] = '\0';
+    size = bptr->length;
+ 
+    BIO_free_all(bio);
+    return size;
+}
+ 
+int base64_decode(char *in_str, int in_len, char *out_str)
+{
+    BIO *b64, *bio;
+    BUF_MEM *bptr = NULL;
+    int counts;
+    int size = 0;
+ 
+    if (in_str == NULL || out_str == NULL)
+        return -1;
+ 
+    b64 = BIO_new(BIO_f_base64());
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+ 
+    bio = BIO_new_mem_buf(in_str, in_len);
+    bio = BIO_push(b64, bio);
+ 
+    size = BIO_read(bio, out_str, in_len);
+    out_str[size] = '\0';
+ 
+    BIO_free_all(bio);
+    return size;
+}
