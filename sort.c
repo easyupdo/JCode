@@ -1214,8 +1214,37 @@ void GetAllFileName(string net_list_file, vector<string> &net_list, string & wav
 
 
 
+//组装字节序 responser是组装好的字节序
+void test(int length,int data_length ,char data)
+{
+	string responser;
+	responser = responser + (char)129;//first byte;
+	if (length < 126)
+		responser = responser + (char)(length) + data;
+	else if (length == 126)
+	{
+		uint16_t data_num = data_length;
+		responser = responser + (char)(126) + (char)data_num + (char)(data_num >> 8) + data;
+	}
+	else if (length == 127)
+	{
+		uint64_t data_num = data_length;
+		responser = responser + (char)(127) + (char)data_num + (char)(data_num >> 8) +
+			(char)(data_num >> 16) + (char)(data_num >> 32) + (char)(data_num >> 32) +
+			(char)(data_num >> 40) + (char)(data_num >> 48) + (char)(data_num >> 56) + data;
+	}
 
 
+	string filename = "E:\\nowWork\\CA\\PartC\\asec5_C_standalone\\kaldiwin_vs2017_OPENBLAS\\Net_PartABC\\net_part_c_libuv\\work\\responser.info";
+	std::ofstream ofs(filename, std::ios::app | std::ios::binary);
+	if (ofs.is_open())
+	{
+		ofs.write(responser.c_str(), responser.size());
+	}
+	else
+		std::cout << errno;
+	ofs.close();
+}
 
 
 
