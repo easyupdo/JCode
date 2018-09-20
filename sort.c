@@ -1245,6 +1245,26 @@ void test(int length,int data_length ,char data)
 		std::cout << errno;
 	ofs.close();
 }
+####
+# 切分单词
+# 输入：string str = "HOW ARE YOU";
+# 输出： HOW  ARE  YOU
+######
+int sent2words(const std::string &sent, std::vector<string> *words) {
+
+      size_t pos_s = 0;
+        size_t pos_e = 0;
+
+          while ((pos_e = sent.find(" ", pos_s)) != std::string::npos) {
+                  words->push_back(sent.substr(pos_s, pos_e - pos_s));
+                      pos_s = pos_e + 1;
+                        }   
+            if (pos_s < sent.size())
+                  words->push_back(sent.substr(pos_s, sent.size() - pos_s));
+
+              return 0;
+}
+
 
 
 
