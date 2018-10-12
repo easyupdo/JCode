@@ -1266,8 +1266,47 @@ int sent2words(const std::string &sent, std::vector<string> *words) {
 }
 
 
-
-
+linux下发布二进制.
+**********************************cpldd.sh***********************************************
+**********************************功能：拷贝依赖文件****************************************
+**********其中，第一个参数代表的是你的可执行文件的名称，第二个参数表示你要导入的目录*****************
+#!/bin/bash
+# Author : Hemanth.HM
+# Email : hemanth[dot]hm[at]gmail[dot]com
+# License : GNU GPLv3
+#
+ 
+function useage()
+{
+    cat << EOU
+Useage: bash $0 <path to the binary> <path to copy the dependencies>
+EOU
+exit 1
+}
+ 
+#Validate the inputs
+[[ $# < 2 ]] && useage
+ 
+#Check if the paths are vaild
+[[ ! -e $1 ]] && echo "Not a vaild input $1" && exit 1
+[[ -d $2 ]] || echo "No such directory $2 creating..."&& mkdir -p "$2"
+ 
+#Get the library dependencies
+echo "Collecting the shared library dependencies for $1..."
+deps=$(ldd $1 | awk 'BEGIN{ORS=" "}$1\
+~/^\//{print $1}$3~/^\//{print $3}'\
+ | sed 's/,$/\n/')
+echo "Copying the dependencies to $2"
+ 
+#Copy the deps
+for dep in $deps
+do
+    echo "Copying $dep to $2"
+    cp "$dep" "$2"
+done
+ 
+echo "Done!"
+**********************************cpldd.sh****************************************
 
 
 
