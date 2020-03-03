@@ -1308,5 +1308,472 @@ done
 echo "Done!"
 **********************************cpldd.sh****************************************
 
+// #cpp
+//add jay
+void ToLower(std::string *word) {
+  std::transform(word->begin(), word->end(), word->begin(), ::tolower);
+}
+
+void RemoveEndOtherSymbols(std::string *word) {
+  int32 last_ch_len = word->length();
+  char last_ch = word->c_str()[last_ch_len - 1];
+  if (last_ch == 46 || last_ch == 44 || last_ch == 33 || last_ch == 63 ||
+      last_ch == 59 || last_ch == 34 || last_ch == 42 || last_ch == 58)
+    *word = word->substr(0, last_ch_len - 1);
+}
+
+void StringSplit(const std::string &str, std::vector<std::string> *words) {
+  size_t pos_s = 0;
+  size_t pos_e = 0;
+  while (pos_e != std::string::npos) {
+    pos_e = str.find(" ", pos_s);
+    if (pos_e == pos_s) {
+      pos_s += 1;
+      continue;
+    }
+    std::string word = str.substr(pos_s, pos_e - pos_s);
+    RemoveEndOtherSymbols(&word);
+    ToLower(&word);
+    words->push_back(word);
+    pos_s = pos_e + 1;
+  }
+  if (pos_s == std::string::npos) {
+    std::string word = str.substr(pos_s, str.size() - pos_s);
+    RemoveEndOtherSymbols(&word);
+    ToLower(&word);
+    words->push_back(word);
+  }
+}
+
+std::string GetMD5 (const char *data, const int32_t data_len) {
+  polly::MD5 md5;
+  md5.update(data, data_len);
+  md5.Set_finalized_Inti_Status();
+  md5.finalize();
+  return md5.md5_();
+}
+int32_t GetMD5(const char *file, std::string *md5_str) {
+  std::ifstream jifs(file);
+  if (!jifs.is_open()) {
+    std::cout << "not open" << std::endl;
+    return kErrorOpenFileFailed;
+  }
+  std::string jmd5((std::istreambuf_iterator<char>(jifs)),
+                   std::istreambuf_iterator<char>());
+  *md5_str = GetMD5(jmd5.c_str(), jmd5.length());
+  return kErrorSuccess;
+}
+
+// Use c && c++  >> main for dir(true)
+bool IsDirOrFile(const char*f) {
+  if (!access(f, 0 | 6)) {
+    std::ofstream ofs(f);
+    if (!ofs.is_open()) {
+      std::cout << "is Open" << std::endl;
+      return true;
+    } else {
+      std::cout << "is Not Open" << std::endl;
+      return false;
+    }
+  }
+}
+// # 多线程
+/*************************************************************************
+    > File Name: lsx-ases-pass.cc
+    > Author: JayGuan
+    > Mail:
+    > Created Time: 2019年12月18日 星期三 11时49分28秒
+ ************************************************************************/
+
+#include "lsx-ases.h"
+#include "../rapidjson/document.h"
+#include<iostream>
+#include <fstream>
+#include <vector>
+#include <map>
+#include <thread>
+#include <assert.h>
+#include <algorithm>
+#include <cxxabi.h>
+#include <execinfo.h>
+#include <mutex>
+
+#define HAVE_EXECINFO_H
+
+#define DEBUG 1
+#define EVA_DEBUG 1
+
+using namespace std;
+using namespace rapidjson;
+std::mutex mx;
+
+// LOG
+
+typedef std::string (*StackTraceHandle)();
+void SetStackTraceHandle(StackTraceHandle handle);
+
+/***** STACKTRACE *****/
+
+static std::string Demangle(std::string trace_name) {
+#if defined(HAVE_CXXABI_H) && defined(HAVE_EXECINFO_H)
+  // at input the string looks like:
+  //   ./kaldi-error-test(_ZN5kaldi13UnitTestErrorEv+0xb) [0x804965d]
+  // We want to extract the name e.g. '_ZN5kaldi13UnitTestErrorEv",
+  // demangle it and return it.
+
+  // try to locate '(' and '+', take the string in between,
+  size_t begin(trace_name.find("(")),
+         end(trace_name.rfind("+"));
+  if (begin != std::string::npos && end != std::string::npos && begin < end) {
+    trace_name = trace_name.substr(begin + 1, end - (begin + 1));
+  }
+  // demangle,
+  int status;
+  char *demangled_name = abi::__cxa_demangle(trace_name.c_str(), 0, 0, &status);
+  std::string ans;
+  if (status == 0) {
+    ans = demangled_name;
+    free(demangled_name);
+  } else {
+    ans = trace_name;
+  }
+  // return,
+  return ans;
+#else
+  return trace_name;
+#endif
+}
+
+
+static std::string StackTrace() {
+  std::string ans;
+#ifdef HAVE_EXECINFO_H
+#define KALDI_MAX_TRACE_SIZE 50
+#define KALDI_MAX_TRACE_PRINT 20  // must be even.
+  // buffer for the trace,
+  void *trace[KALDI_MAX_TRACE_SIZE];
+  // get the trace,
+  size_t size = backtrace(trace, KALDI_MAX_TRACE_SIZE);
+  // get the trace symbols,
+  char **trace_symbol = backtrace_symbols(trace, size);
+
+  // Compose the 'string',
+  ans += "[ Stack-Trace: ]\n";
+  if (size <= KALDI_MAX_TRACE_PRINT) {
+    for (size_t i = 0; i < size; i++) {
+      ans += Demangle(trace_symbol[i]) + "\n";
+    }
+  } else {  // print out first+last (e.g.) 5.
+    for (size_t i = 0; i < KALDI_MAX_TRACE_PRINT / 2; i++) {
+      ans += Demangle(trace_symbol[i]) + "\n";
+    }
+    ans += ".\n.\n.\n";
+    for (size_t i = size - KALDI_MAX_TRACE_PRINT / 2; i < size; i++) {
+      ans += Demangle(trace_symbol[i]) + "\n";
+    }
+    if (size == KALDI_MAX_TRACE_SIZE)
+      ans += ".\n.\n.\n";  // stack was too long, probably a bug.
+  }
+
+  // cleanup,
+  free(trace_symbol);  // it's okay, just the pointers, not the strings.
+#endif  // HAVE_EXECINFO_H
+  return ans;
+}
+
+
+
+StackTraceHandle GetStackTrace = StackTrace;
+// LOG
+
+using M_LIST = std::multimap<std::string, std::vector<std::string>>;
+using T_LIST = std::vector<M_LIST>;
+using E_LIST = std::vector<std::thread*>;
+
+bool IsNetFile(string in_file) {
+  string file_name = in_file.substr(in_file.find_last_of(".") + 1);
+  if (file_name == "net" || file_name == "NET")
+    return true;
+  else
+    return false;
+}
+
+bool IsWavFile(string in_file) {
+  string file_name = in_file.substr(in_file.find_last_of(".") + 1);
+  if (file_name == "wav" || file_name == "WAV")
+    return true;
+  else
+    return false;
+}
+
+
+void ReadListFile(std::string list_file, M_LIST * m_list) {
+  std::string line;
+  std::string file;
+  std::ifstream in_stream;
+  std::string net_list_file = list_file;
+  using NetList = std::vector<std::string>;
+  in_stream.open(net_list_file);
+  if (in_stream.is_open()) {
+    bool newline = false;
+    int session_num = 0;
+    while (!in_stream.eof()) {
+
+      std::string wav;
+      NetList net_list;
+      getline(in_stream, line);//䷾M读住~V彍¢蠾L符
+      if (line.size() <= 0)
+        continue;
+      newline = true;
+      const char * cline = line.data();
+      for (int i = 0; i < line.size(); i++) {
+        if (cline[i] != ' ') {
+          file = file + cline[i];
+        } else {
+          //file = "/home/liping/win10/300/"+ file;
+          file =  file;
+          if (file.size() > 0) {
+            if (IsNetFile(file))
+              net_list.push_back(file);
+            else if (IsWavFile(file))//wav
+              if (net_list.size() == 0)
+                wav = file;
+              else//others
+                net_list.push_back(file);
+            file.clear();
+          }
+        }
+      }
+      //file = "/home/liping/win10/300/" + file;
+      file = file;
+
+      //if (IsNetFile(file))//if ䷾@蠾L纾S彝~_ if彘¯彍¢蠾L 佈¤彖­彘¯䷾M彘¯彖~G件
+      if (IsWavFile(file)) {
+        if (net_list.size() == 0)
+          wav = file;
+      } else
+        net_list.push_back(file);
+      file.clear();
+#if DEBUG
+      std::cout << "net_list:" << net_list.size() << std::endl;
+      std::cout << "Session num:" << ++session_num << std::endl;
+      std::cout << "WAV:" << wav << " ";
+      std::cout << "wav.c_str():" << wav.c_str() << std::endl;
+#endif
+      m_list->insert(std::pair<std::string, std::vector<std::string>>(wav, net_list));
+    }
+  }
+  /*
+    for (auto x : *m_list) {
+      std::cout << "XXX" << x.first << std::endl;
+      for (auto y : x.second) {
+        std::cout << "YYY" << y << std::endl;
+      }
+    }
+    */
+
+}
+
+
+
+
+size_t LoadBalance(M_LIST *m_list, T_LIST *t_list, size_t num_max) {
+
+  size_t x = m_list->size() / (num_max);
+  size_t y = m_list->size() % (num_max);
+
+
+  size_t a_con = 0;
+  size_t con = 0;
+  size_t l = 0;
+  M_LIST sub_m_list;
+  for (auto T : *m_list) {
+    if (a_con < num_max) {
+      sub_m_list.insert(T);
+      con += 1;
+    } else {
+      T_LIST::iterator it = t_list->begin() + l;
+      it->insert(T);
+      l += 1;
+    }
+    if (con == x && a_con < num_max) {
+      t_list->push_back(sub_m_list);
+      con = 0;
+      a_con += 1;
+      sub_m_list.clear();
+    }
+    if(x <= 0) {
+      t_list->push_back(sub_m_list);
+      con = 0;
+      sub_m_list.clear();
+    }
+  }
+
+  /*
+  for (auto T : *t_list) {
+    std::cout << "T_LIST:" << std::endl;
+    for (auto K : T) {
+      std::cout << "M:" << K.first << std::endl;
+    }t_list
+  }
+  */
+
+  return t_list->size();
+}
+
+void WriteFile(const std::string &wav, const char*result, const size_t &t_count, const std::string &filename) {
+
+  std::ofstream ofs(filename, std::ios::app);
+  if (ofs.is_open()) {
+    std::cout<<result<<std::endl;
+    //
+    Document document;
+    document.Parse(result);
+    assert(document.HasMember("score"));
+    assert(document["score"].IsDouble());
+    double p_score = document["score"].GetDouble();
+    //printf("%g %g\n", document["score"].GetDouble(),endtime);
+
+    std::string pass_result = std::to_string(p_score);
+
+    assert(document.HasMember("isReject"));
+    assert(document["isReject"].IsInt());
+    int p_isRegect = document["isReject"].GetInt();
+    //printf("isRegect%d\n", document["isReject"].GetInt());
+    std::string pass_Reject = std::to_string(p_isRegect);
+
+
+    std::string w_file_str = "wav:" + wav + " " + "score:" + pass_result + " " + "isReject:" + pass_Reject + " " + "count:" + std::to_string(t_count) + "\n";
+    ofs << w_file_str;
+    ofs.close();
+  }
+}
+
+
+void Task(M_LIST m_list, const std::string type, const std::string model_dir, const std::string output_file) {
+  int err_code = -1;
+  size_t t_count = 0;
+  const char *polly_id = LsxAsesStart (model_dir.c_str(), &err_code);
+  const char *session_id = LsxAsesSessionBegin(polly_id, type.c_str(), &err_code);
+
+  auto evaluate = [&](std::string wav, std::vector<std::string>net_lists) {
+    for (auto net : net_lists) {
+#if DEBUG
+      std::cout << "Net:" << net << std::endl;
+#endif
+      err_code = LsxAsesSessionDataIn(session_id, net.c_str(), 0, "path");
+      if (err_code)
+        std::cout<<GetStackTrace();
+    }
+
+    FILE *fp = NULL;
+    fp = fopen(wav.c_str(), "rb");
+    if (fp != NULL) {
+      //exit(1);
+
+      fseek(fp, 0, SEEK_END);
+      size_t len = (ftell(fp) - 44) ;
+      fseek(fp, 44, SEEK_SET);
+      char *data = new char[len];
+      size_t nread = fread(data, sizeof(char), len, fp);
+      assert(nread == len);
+      fclose(fp);
+      int vad_status = 0;
+      int status = 0;
+      err_code = LsxAsesSessionSpeechIn(session_id, data, len, "wav", NULL);
+      delete []data;
+      if (err_code)
+        std::cout<<GetStackTrace();
+      int result_len = 0;
+      std::lock_guard<std::mutex> locak(mx);
+      const char *result = LsxAsesSessionGetResult(session_id, "up366", &result_len, &err_code);
+      t_count += 1;
+
+#if DEBUG
+      printf("%s\n", result);
+#endif
+#if EVA_DEBUG
+      WriteFile(wav, result, t_count, output_file);
+#endif
+    } else {
+      std::cout << "Wav file open failed!" << std::endl;
+    }
+  };
+
+  //all
+  //std::for_each(m_list->begin(),m_list->end(),evaluate);
+  for (M_LIST::const_iterator it = m_list.begin(); it != m_list.end(); ++it) {
+    evaluate(it->first, it->second);
+  }
+
+}
+
+
+void ParallelProcess(M_LIST * m_list, E_LIST * e_list, const std::string type, const std::string &model_dir, const std::string &output_file) {
+  size_t th_num_max = std::thread::hardware_concurrency();
+  th_num_max = 1; //threads num
+
+  int a = 10;
+  T_LIST t_list;
+  if (LoadBalance(m_list, &t_list, th_num_max) <= th_num_max) {
+    for (size_t i = 0; i < t_list.size(); ++i) {
+      std::string th_output_file = output_file + "_" + std::to_string(i);
+      std::thread *th = new std::thread(Task, (t_list[i]),type, model_dir, th_output_file);
+      e_list->push_back(th);
+    }
+  } else {
+    std::cout << "Task > th_num_max" << std::endl;
+  }
+}
+
+void Usage() {
+  std::cout << "*****************************************************************************" << std::endl;
+  std::cout << "**** Usage: xxx.exe mession_type model_dir mession_list output_filename ****" << std::endl;
+  std::cout << "**** HELP:                                                              ****" << std::endl;
+  std::cout << "****    mession_type:parta/partb/partc                                  ****" << std::endl;
+  std::cout << "****    mession_list format: xxx.wav xxx1.net xxx2.net                  ****" << std::endl;
+  std::cout << "****************************************************************************" << std::endl;
+  exit(1);
+}
+
+
+int main(int argc, char * argv[]) {
+  if (argc != 5)
+    Usage();
+
+  M_LIST m_list;
+  E_LIST e_list;
+  /*
+  std::string model_dir = "/home/lsx/Data/model库/chain模型/chain_e_dither_0.0";
+  std::string output_file = "/home/lsx/work/CA/polly-v2.1-release/Polly/polly/export_lsx/T_OUT.txt";
+
+  std::string net_list_file = "/home/lsx/Data/ZJ_partc_release/ZJ-partC-v2.1.txt";
+  */
+
+  std::string type = std::string(argv[1]);
+  std::string model_dir = std::string(argv[2]);
+  std::string net_list_file = std::string(argv[3]);
+  std::string output_file = std::string(argv[4]);
+
+  auto stime = std::chrono::system_clock::now();
+  ReadListFile(net_list_file, &m_list);
+
+  ParallelProcess(&m_list, &e_list,type, model_dir, output_file);
+  std::cout << "e_list:" << e_list.size() << std::endl;
+
+  for (auto T : e_list) {
+    T->join();
+  }
+
+  for (auto T : e_list) {
+    delete T;
+  }
+
+  auto etime = std::chrono::system_clock::now();
+  double t = std::chrono::duration_cast<std::chrono::seconds>(etime - stime).count();
+  std::cout << "Time:" << t << std::endl;
+  return 0;
+
+}
 
 
