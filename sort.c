@@ -1776,4 +1776,62 @@ int main(int argc, char * argv[]) {
 
 }
 
+//去除vector连续重复单词 并 记录重复单词
+/*************************************************************************
+    > File Name: RepeatWords.cc
+    > Author: JayGuan
+    > Mail:
+    > Created Time: 一  3/16 11:49:24 2020
+ ************************************************************************/
 
+#include<iostream>
+#include <vector>
+#include <map>
+#include <string>
+
+void RepeatWords(std::vector<std::string>*src, std::multimap<std::string, int32_t>*rw_words) {
+  int32_t num = 0;
+  //for (std::vector<std::string>::const_iterator it = src.begin(); it != src.end(); (num > 0) ? it += num : it += 1) {
+  for (std::vector<std::string>::const_iterator it = src->begin(); it != src->end(); it += 1) {
+    num = 0;
+    bool have = false;
+    //for (std::vector<std::string>::const_iterator it_move = it + 1; it_move != src.end(); it_move++) {
+    for (std::vector<std::string>::const_iterator it_move = it + 1; it_move != src->end();) {
+      if (*it == *it_move) {
+        num += 1;
+        have = true;
+        it_move = src->erase(it_move);
+      } else {
+        it_move+=1;
+        break;
+      }
+    }
+    if (have)
+      rw_words->insert(std::pair<std::string, int32_t>(*it, num));
+  }
+
+  // out for test
+  for (std::multimap<std::string, int32_t>::const_iterator oit = rw_words->begin(); oit != rw_words->end(); oit++) {
+    std::cout << "word:" << oit->first << "    num:" << oit->second << std::endl;
+  }
+  std::cout<<"Src:";
+  for(auto one : *src)
+  std::cout<<one<<" ";
+  std::cout<<std::endl;
+
+}
+
+
+
+
+using namespace std;
+int main(int argc, char * argv[]) {
+
+  std::vector<std::string> src = {"how", "how", "how", "are", "you", "how", "how", "how"};
+  std::multimap<std::string, int32_t>out;
+  RepeatWords(&src, &out);
+
+  return 0;
+}
+
+//------------------------------
