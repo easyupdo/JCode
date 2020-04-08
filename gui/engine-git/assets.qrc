@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/conf">
+        <file>conf/engine.ini</file>
+    </qresource>
+</RCC>
