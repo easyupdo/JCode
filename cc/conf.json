@@ -1,0 +1,12 @@
+{
+    "name":"jay",
+    "NetWork":{
+        "local_ip":"192.168.1.1",
+        "TcpPort":5555,
+        "UdpPort":6666
+    },
+    "array":[
+        "Hello",
+        "World"
+    ]
+}

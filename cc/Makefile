@@ -43,3 +43,15 @@ feture:
 
 raii_demo:
 	g++ ./raii/raii_demo.cc -o raii_demo -g -std=c++17
+
+test_vector:
+	g++ ./test_vector.cc -o test_vector -g -std=c++11 -lpthread
+
+throw:
+	g++ ./throw.cc -o throw -g -std=c++11
+
+boost_ptree:
+	g++ ./boost_ptree.cc -o boost_ptree -std=c++17 -l stdc++fs -g
+
+temp:
+	g++ ./temp.cc -o temp -std=c++17 -g

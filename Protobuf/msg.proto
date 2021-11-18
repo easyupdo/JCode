@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+message JMSG {
+    
+    string name = 1;
+}

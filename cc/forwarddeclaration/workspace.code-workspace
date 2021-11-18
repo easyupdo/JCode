@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "../../../../Easyup/easyup.club"
+		},
+		{
+			"path": "../../../RCLC/Tiger/core"
+		},
+		{
+			"path": "../../../RCLC/L_intra"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}

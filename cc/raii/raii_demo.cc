@@ -167,6 +167,8 @@ int main(int argc,char **argv) {
 
     User * rtuser = nullptr;
     rtuser = new (static_cast<User*>(static_cast<void*>(tuser))) User("SB");
+
+
     std::cout<<"tuser:"<<(static_cast<User*>(static_cast<void*>(tuser))->GetName())<<std::endl;
 
     // multi-class return wapper
