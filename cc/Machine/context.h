@@ -8,7 +8,7 @@ class Context{
     Context(){
         std::cout<<"Context"<<std::endl;
     }
-    ~Context(){}
+    virtual ~Context(){}
 
     void SetState(StateBase * state) {
         this->state = state;

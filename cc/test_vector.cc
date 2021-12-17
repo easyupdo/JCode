@@ -25,6 +25,10 @@ int FuckFunc(){
 
 int main(int argc,char **argv) {
 
+    std::vector<char> ch_vec{};
+    char * da ="Hello";
+    ch_vec.insert(ch_vec.end(),da,da+5);
+
     std::vector<std::thread> vec;
 
     // send 5s

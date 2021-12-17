@@ -98,6 +98,25 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "name": "thread_pool_test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/rosfoxy/Easyup/JCode/cc/thread_pool/thread_pool_test",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }
